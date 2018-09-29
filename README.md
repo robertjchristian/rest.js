@@ -148,35 +148,39 @@ for the following requests.
 
 ## Pagination
 
-There are a few pagination-related methods:
+A `.paginate` method can me called on each endpoint that supports pagination.
 
-- `hasNextPage(response)`
-- `hasPreviousPage(response)`
-- `hasFirstPage(response)`
-- `hasLastPage(response)`
-- `getNextPage(response)`
-- `getPreviousPage(response)`
-- `getFirstPage(response)`
-- `getLastPage(response)`
-
-Usage
+If your environment supports async iterators (`for await of`), you can paginate
+like this
 
 ```js
-async function paginate (method) {
-  let response = await method({ per_page: 100 })
-  let { data } = response
-  while (octokit.hasNextPage(response)) {
-    response = await octokit.getNextPage(response)
-    data = data.concat(response.data)
+async function getAllIssuesForRepo ({ owner, repo }) {
+  const results = []
+  for await (const result of github.issues.getForRepo.paginate({ owner, repo })) {
+    results.push(...result.data)
   }
-  return data
+  return results
 }
-
-paginate(octokit.repos.getAll)
-  .then(data => {
-    // handle all results
-  })
+// results no contain all issues from all pages
 ```
+
+Otherwise you can get the iterator and call `.next()` on it
+
+```js
+async function getAllIssuesForRepo ({ owner, repo }) {
+  const iterator = github.issues.getForRepo.paginate(options)[Symbol.asyncIterator]()
+  const results = []
+  let result
+
+  while (true) {
+    result = await iterator.next()
+    if (result.done) break
+    results.push(...result.value.data)
+  }
+}
+```
+
+More [examples for pagination](https://github.com/octokit/rest.js/blob/master/examples/pagination.js).
 
 ## Debug
 
