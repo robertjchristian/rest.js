@@ -51,10 +51,31 @@ describe('smoke', () => {
     github.orgs.get({ org: 'myorg' }, done)
   })
 
-  it('custom header', () => {
+  it('custom user agent header as client option', () => {
     nock('https://smoke-test.com', {
       reqheaders: {
         'user-agent': `blah octokit.js/0.0.0-semantically-released ${getUserAgent()}`
+      }
+    })
+      .get('/orgs/octokit')
+      .reply(200, {})
+
+    const github = new GitHub({
+      baseUrl: 'https://smoke-test.com',
+      headers: {
+        'User-Agent': 'blah'
+      }
+    })
+
+    return github.orgs.get({
+      org: 'octokit'
+    })
+  })
+
+  it('custom user agent header as request option', () => {
+    nock('https://smoke-test.com', {
+      reqheaders: {
+        'user-agent': `blah`
       }
     })
       .get('/orgs/octokit')
