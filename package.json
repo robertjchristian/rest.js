@@ -36,6 +36,7 @@
     "node": ">=4"
   },
   "dependencies": {
+    "@octokit/request": "1.1.0",
     "before-after-hook": "^1.1.0",
     "btoa-lite": "^1.0.0",
     "debug": "^3.1.0",
